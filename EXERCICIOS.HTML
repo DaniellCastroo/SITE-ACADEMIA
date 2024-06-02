@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Exercícios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: url('imagem de fudo com a logo da academia.png') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .exercises-container {
+            margin-bottom: 20px;
+        }
+
+        #allExercises {
+            width: 200px;
+            height: 200px;
+            color: black;
+        }
+
+        .lists-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        .list {
+            width: 200px;
+            padding: 10px;
+            background-color: black;
+            border-radius: 5px;
+            margin: 0;
+        }
+
+        .list h3 {
+            text-align: center;
+            background-color: black;
+            color: rgb(229, 229, 236);
+            margin: 0 -10px 10px -10px;
+            padding: 10px;
+            border: 1px solid blue;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .lock {
+            position: absolute;
+            top: 50%;
+            right: 5px;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background-image: url('lock.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            display: none;
+        }
+
+        .list.finalized .lock {
+            display: block;
+        }
+
+        .list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: white;
+            border-radius: 5px;
+            color: black;
+            position: relative;
+        }
+
+        .list li.locked {
+            pointer-events: none;
+            background-color: #ccc;
+        }
+
+        .list button {
+            margin-left: 10px;
+            border: 2px solid rgb(40, 40, 197);
+            background-color: transparent;
+            color: blue;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .list button:hover {
+            background-color: blue;
+            color: white;
+        }
+
+        .exercise-slot {
+            height: 30px;
+            line-height: 30px;
+            border: 1px solid #ccc;
+            background-color: white;
+            margin-bottom: 5px;
+            text-align: center;
+            border-radius: 5px;
+            color: black;
+            position: relative;
+        }
+
+        .warning {
+            color: red;
+            display: none;
+            text-align: center;
+        }
+
+        .finalize-btn {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .finalize-btn button {
+            border: 2px solid rgb(40, 40, 197);
+            background-color: transparent;
+            color: blue;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .finalize-btn button:hover {
+            background-color: blue;
+            color: white;
+        }
+
+        .email-input-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .email-input {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .email-input input[type="email"] {
+            width: 200px;
+            height: 30px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            padding: 0 10px;
+            margin-right: 10px;
+        }
+
+        .email-btn button {
+            border: 2px solid green;
+            background-color: transparent;
+            color: green;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .email-btn button:hover {
+            background-color: green;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Selecione seus exercícios para a semana</h1>
+    <div class="exercises-container">
+        <h2>Todos os Exercícios</h2>
+        <select id="allExercises" multiple>
+            <!-- Gerar exercícios dinamicamente -->
+        </select>
+        <button onclick="addExercise()">Adicionar Exercício</button>
+    </div>
+
+    <div class="lists-container">
+        <!-- Gerar 5 listas dinamicamente para segunda a sexta -->
+    </div>
+
+    <div class="email-input-container">
+        <div class="email-input">
+            <input type="email" placeholder="Coloque seu email">
+            <div class="email-btn">
+                <button onclick="sendEmail()">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const exercises = [
+            'Supino', 'Crucifixo', 'Flexão de braço', 'Pullover', // Peito
+            'Rosca direta', 'Rosca martelo', 'Rosca concentrada', // Bíceps
+            'Tríceps testa', 'Tríceps pulley', 'Mergulho no banco', // Tríceps
+            'Desenvolvimento com barra', 'Elevação lateral', 'Elevação frontal', // Ombro
+            'Agachamento', 'Leg press', 'Extensão de perna', 'Flexão de perna', // Perna
+            'Remada curvada', 'Puxada alta', 'Levantamento terra', // Costas
+        ];
+
+        const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+
+        // Populate exercises select box
+        const allExercisesSelect = document.getElementById('allExercises');
+        exercises.forEach(exercise => {
+            const option = document.createElement('option');
+            option.value = exercise;
+            option.textContent = exercise;
+            allExercisesSelect.appendChild(option);
+        });
+
+        // Create lists for each day
+        const listsContainer = document.querySelector('.lists-container');
+        days.forEach(day => {
+            const dayContainer = document.createElement('div');
+            dayContainer.classList.add('list');
+            dayContainer.innerHTML = `
+                <h3>${day}<span class="lock"></span></h3>
+                <ul id="${day.toLowerCase()}List">
+                    ${Array.from({ length: 8 }).map(() => '<li class="exercise-slot"></li>').join('')}
+                </ul>
+                <p class="warning">
+                </ul>
+                <p class="warning">
+                    Máximo de 8 exercícios atingido</p>
+                <div class="finalize-btn">
+                    <button onclick="toggleLock('${day.toLowerCase()}')">Trancar</button>
+                </div>
+            `;
+            listsContainer.appendChild(dayContainer);
+        });
+
+        // Function to add selected exercise to the selected day's list
+        function addExercise() {
+            const selectedExercises = Array.from(allExercisesSelect.selectedOptions).map(option => option.value);
+            selectedExercises.forEach(exercise => {
+                const day = prompt('Para qual dia deseja adicionar este exercício? (Segunda, Terça, Quarta, Quinta, Sexta)');
+                if (day && days.map(d => d.toLowerCase()).includes(day.toLowerCase())) {
+                    const list = document.getElementById(`${day.toLowerCase()}List`);
+                    const warning = list.parentElement.querySelector('.warning');
+                    const emptySlot = Array.from(list.children).find(slot => slot.classList.contains('exercise-slot') && !slot.textContent.trim());
+                    if (emptySlot) {
+                        if (!Array.from(list.querySelectorAll('li')).some(item => item.textContent === exercise)) {
+                            emptySlot.textContent = exercise;
+                            emptySlot.classList.remove('exercise-slot');
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'Deletar';
+                            deleteButton.onclick = () => {
+                                emptySlot.textContent = '';
+                                emptySlot.classList.add('exercise-slot');
+                                emptySlot.removeChild(deleteButton);
+                                if (Array.from(list.children).filter(slot => !slot.classList.contains('exercise-slot')).length < 8) {
+                                    warning.style.display = 'none';
+                                }
+                            };
+                            emptySlot.appendChild(deleteButton);
+                        } else {
+                            alert('Este exercício já foi adicionado para este dia.');
+                        }
+                    } else {
+                        warning.style.display = 'block';
+                    }
+                } else {
+                    alert('Dia inválido. Tente novamente.');
+                }
+                checkLock(day.toLowerCase());
+            });
+        }
+
+        // Function to toggle lock/unlock for a day's exercises
+        function toggleLock(day) {
+            const list = document.getElementById(`${day}List`);
+            const lockIcon = list.parentElement.querySelector('.lock');
+            const finalizeButton = list.parentElement.querySelector('.finalize-btn button');
+            const exerciseSlots = list.querySelectorAll('.exercise-slot');
+            if (lockIcon.style.display === 'block') {
+                // Unlock
+                lockIcon.style.display = 'none';
+                finalizeButton.textContent = 'Trancar';
+                list.classList.remove('finalized');
+                exerciseSlots.forEach(slot => {
+                    slot.classList.remove('locked');
+                });
+            } else {
+                // Lock
+                lockIcon.style.display = 'block';
+                finalizeButton.textContent = 'Destrancar';
+                list.classList.add('finalized');
+                exerciseSlots.forEach(slot => {
+                    slot.classList.add('locked');
+                });
+            }
+        }
+
+        // Function to check if all slots are filled and update lock button accordingly
+        function checkLock(day) {
+            const list = document.getElementById(`${day}List`);
+            const finalizeButton = list.parentElement.querySelector('.finalize-btn button');
+            const exerciseSlots = list.querySelectorAll('.exercise-slot');
+            if (Array.from(exerciseSlots).every(slot => !slot.classList.contains('exercise-slot'))) {
+                finalizeButton.disabled = false;
+            } else {
+                finalizeButton.disabled = true;
+            }
+        }
+
+        // Function to send email
+        function sendEmail() {
+            const emailInput = document.querySelector('.email-input input[type="email"]');
+            const userEmail = emailInput.value;
+            if (confirm("Deseja sair?")) {
+                window.location.href = "inicio.html";
+            }
+            // Aqui você pode implementar a lógica para enviar o email com os exercícios selecionados para o usuário.
+            alert(`Os exercícios selecionados foram enviados para o email: ${userEmail}`);
+        }
+    </script>
+</body>
+</html>
+
+
+
